@@ -1,7 +1,7 @@
 {
   "mcpServers": {
-    "world-time": {
-      "url": "https://world-time-mcp.onrender.com/mcp",
+    "team-time": {
+      "url": "https://team-time-mcp.onrender.com/mcp",
       "description": "Team directory: where each team member is, their time zone, and time differences between people (Streamable HTTP, hosted on Render)"
     }
   }

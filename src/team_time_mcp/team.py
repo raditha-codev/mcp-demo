@@ -25,7 +25,7 @@ def _normalize(text: str) -> str:
 
 @cache
 def members() -> tuple[Member, ...]:
-    data = json.loads(resources.files("world_time_mcp").joinpath("team.json").read_text(encoding="utf-8"))
+    data = json.loads(resources.files("team_time_mcp").joinpath("team.json").read_text(encoding="utf-8"))
     return tuple(Member(**item) for item in data)
 
 

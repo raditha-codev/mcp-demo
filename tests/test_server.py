@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 import pytest
 from mcp import Client
 
-from world_time_mcp.server import mcp
+from team_time_mcp.server import mcp
 
 pytestmark = pytest.mark.anyio
 

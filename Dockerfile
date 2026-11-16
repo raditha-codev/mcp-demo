@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir .
 
 ENV MCP_TRANSPORT=streamable-http HOST=0.0.0.0 PORT=8000
 EXPOSE 8000
-CMD ["world-time-mcp"]
+CMD ["team-time-mcp"]

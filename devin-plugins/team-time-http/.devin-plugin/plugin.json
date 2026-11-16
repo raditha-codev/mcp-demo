@@ -1,0 +1,5 @@
+{
+  "name": "team-time-http",
+  "version": "0.2.0",
+  "description": "Team Time MCP server (Streamable HTTP): team directory with locations, time zones and time differences; connects to the hosted deployment on Render"
+}

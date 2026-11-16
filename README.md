@@ -8,7 +8,7 @@ questions an AI agent can't answer on its own, because the team data only lives 
 - What's Emma's time zone?
 - How many hours ahead or behind is John compared with Smith?
 
-The team is defined in [`src/world_time_mcp/team.json`](src/world_time_mcp/team.json) (ten members across
+The team is defined in [`src/team_time_mcp/team.json`](src/team_time_mcp/team.json) (ten members across
 ten time zones); edit it to use your own team. Times are computed locally with Python's `zoneinfo`, so
 differences account for daylight saving time on the day you ask. No API keys or external services.
 
@@ -38,6 +38,7 @@ Example `time_difference("John", "Smith")` result (in November):
 
 ## Install
 
+For Devin Cloud, see [DEVIN_SETUP.md](DEVIN_SETUP.md) (adding it by hand from Customize → MCPs).
 See [INSTALL.md](INSTALL.md) for step-by-step setup of both versions: **stdio** (in Devin Cloud or any
 MCP client) and **Streamable HTTP** (deployed to Render).
 
@@ -53,7 +54,7 @@ pip install -e .
 Or run it straight from GitHub with [uv](https://docs.astral.sh/uv/):
 
 ```bash
-uvx --from git+https://github.com/raditha-codev/mcp-demo world-time-mcp
+uvx --from git+https://github.com/raditha-codev/mcp-demo team-time-mcp
 ```
 
 ## Use with an MCP client
@@ -64,16 +65,16 @@ The server speaks MCP over stdio. Add it to your client's config, e.g. Claude De
 ```json
 {
   "mcpServers": {
-    "world-time": {
+    "team-time": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/raditha-codev/mcp-demo", "world-time-mcp"]
+      "args": ["--from", "git+https://github.com/raditha-codev/mcp-demo", "team-time-mcp"]
     }
   }
 }
 ```
 
 If you installed it locally instead, point `command` at the virtualenv's executable,
-e.g. `"/path/to/mcp-demo/.venv/bin/world-time-mcp"` with no `args`.
+e.g. `"/path/to/mcp-demo/.venv/bin/team-time-mcp"` with no `args`.
 
 ## Run over Streamable HTTP
 
@@ -82,7 +83,7 @@ By default the server uses **stdio** (the client launches it as a local process)
 instead, e.g. to host it once for many clients:
 
 ```bash
-world-time-mcp --transport streamable-http --host 0.0.0.0 --port 8000
+team-time-mcp --transport streamable-http --host 0.0.0.0 --port 8000
 ```
 
 The MCP endpoint is `http://<host>:8000/mcp`, with a health check at `/health`. The server is stateless
@@ -92,8 +93,8 @@ The same options can be set with the `MCP_TRANSPORT`, `HOST` and `PORT` environm
 With Docker:
 
 ```bash
-docker build -t world-time-mcp .
-docker run -p 8000:8000 world-time-mcp
+docker build -t team-time-mcp .
+docker run -p 8000:8000 team-time-mcp
 ```
 
 Clients then connect by URL, e.g.:
@@ -101,7 +102,7 @@ Clients then connect by URL, e.g.:
 ```json
 {
   "mcpServers": {
-    "world-time": { "url": "https://your-host.example.com/mcp" }
+    "team-time": { "url": "https://your-host.example.com/mcp" }
   }
 }
 ```
@@ -114,7 +115,7 @@ it should not be public.
 To try it interactively, use the MCP Inspector:
 
 ```bash
-npx @modelcontextprotocol/inspector .venv/bin/world-time-mcp
+npx @modelcontextprotocol/inspector .venv/bin/team-time-mcp
 ```
 
 ## Development

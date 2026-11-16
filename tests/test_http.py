@@ -7,7 +7,7 @@ import urllib.request
 import pytest
 from mcp import Client
 
-from world_time_mcp.server import _parse_args
+from team_time_mcp.server import _parse_args
 
 pytestmark = pytest.mark.anyio
 
@@ -27,7 +27,7 @@ def _free_port() -> int:
 def http_server():
     port = _free_port()
     proc = subprocess.Popen(
-        [sys.executable, "-m", "world_time_mcp", "--transport", "streamable-http", "--port", str(port)],
+        [sys.executable, "-m", "team_time_mcp", "--transport", "streamable-http", "--port", str(port)],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )

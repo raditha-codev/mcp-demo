@@ -14,10 +14,10 @@ from mcp.types import ToolAnnotations
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from world_time_mcp import team
+from team_time_mcp import team
 
 mcp = MCPServer(
-    name="world-time",
+    name="team-time",
     instructions=(
         "Directory of the team: who is on it, where each person is based, their time zone, "
         "and how many hours ahead or behind one person is compared with another. "
@@ -126,7 +126,7 @@ async def health(_: Request) -> JSONResponse:
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(prog="world-time-mcp", description=__doc__)
+    parser = argparse.ArgumentParser(prog="team-time-mcp", description=__doc__)
     parser.add_argument(
         "--transport",
         choices=["stdio", "streamable-http"],
