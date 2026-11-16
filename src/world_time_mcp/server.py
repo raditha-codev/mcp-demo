@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import argparse
+import os
 from datetime import datetime, timezone
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -9,6 +11,8 @@ from zoneinfo import ZoneInfo
 from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import ToolAnnotations
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from world_time_mcp import cities as city_lookup
 
@@ -150,8 +154,36 @@ def find_cities(query: str, limit: int = 5) -> list[dict[str, Any]]:
     ]
 
 
-def main() -> None:
-    mcp.run()
+@mcp.custom_route("/health", methods=["GET"])
+async def health(_: Request) -> JSONResponse:
+    return JSONResponse({"status": "ok"})
+
+
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(prog="world-time-mcp", description=__doc__)
+    parser.add_argument(
+        "--transport",
+        choices=["stdio", "streamable-http"],
+        default=os.environ.get("MCP_TRANSPORT", "stdio"),
+        help="stdio (default) for local clients, streamable-http to serve over HTTP at /mcp",
+    )
+    parser.add_argument(
+        "--host",
+        default=os.environ.get("HOST", "127.0.0.1"),
+        help="HTTP bind address (default 127.0.0.1; use 0.0.0.0 in containers)",
+    )
+    parser.add_argument(
+        "--port", type=int, default=int(os.environ.get("PORT", "8000")), help="HTTP port (default 8000)"
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = _parse_args(argv)
+    if args.transport == "stdio":
+        mcp.run()
+    else:
+        mcp.run("streamable-http", host=args.host, port=args.port, stateless_http=True, json_response=True)
 
 
 if __name__ == "__main__":

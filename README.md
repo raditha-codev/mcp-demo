@@ -79,6 +79,42 @@ The server speaks MCP over stdio. Add it to your client's config, e.g. Claude De
 If you installed it locally instead, point `command` at the virtualenv's executable,
 e.g. `"/path/to/mcp-demo/.venv/bin/world-time-mcp"` with no `args`.
 
+## Run over Streamable HTTP
+
+By default the server uses **stdio** (the client launches it as a local process). To serve it over
+[Streamable HTTP](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#streamable-http)
+instead, e.g. to host it once for many clients:
+
+```bash
+world-time-mcp --transport streamable-http --host 0.0.0.0 --port 8000
+```
+
+The MCP endpoint is `http://<host>:8000/mcp`, with a health check at `/health`. The server is stateless
+(JSON responses, no sessions), so it can run behind a load balancer or on serverless platforms.
+The same options can be set with the `MCP_TRANSPORT`, `HOST` and `PORT` environment variables.
+
+With Docker:
+
+```bash
+docker build -t world-time-mcp .
+docker run -p 8000:8000 world-time-mcp
+```
+
+Clients then connect by URL, e.g.:
+
+```json
+{
+  "mcpServers": {
+    "world-time": { "url": "https://your-host.example.com/mcp" }
+  }
+}
+```
+
+The HTTP endpoint has no authentication; put it behind your platform's auth or a private network if
+it should not be public.
+
+## Try it
+
 To try it interactively, use the MCP Inspector:
 
 ```bash
