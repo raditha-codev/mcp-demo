@@ -28,8 +28,8 @@ There are two independent ways to use this server. Pick either one (or both).
 2. Open **Customize → Plugins → Add plugin → From repository**, choose the scope
    (**Myself** or the organization), and enter repository `raditha-codev/mcp-demo` with
    subdirectory `devin-plugins/world-time-stdio`.
-3. Start a new session. The `world-time` MCP server and its tools (`get_time`, `compare_times`,
-   `convert_time`, `find_cities`) are available. Running sessions keep what they loaded at start.
+3. Start a new session. The `world-time` MCP server and its tools (`list_team_members`, `where_is`,
+   `get_timezone`, `time_difference`) are available. Running sessions keep what they loaded at start.
 
 With the Devin CLI, the equivalent of step 2 is:
 

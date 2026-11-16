@@ -1,45 +1,38 @@
-# World Time MCP server
+# Team time zone MCP server
 
-An [MCP](https://modelcontextprotocol.io) server that tells the current time in cities around the world
-and converts times between cities.
+An [MCP](https://modelcontextprotocol.io) demo server for a (fictional) distributed team. It answers
+questions an AI agent can't answer on its own, because the team data only lives here:
 
-It works fully offline: city names are resolved to IANA time zones using the bundled
-[GeoNames](https://www.geonames.org/) dataset (~34,000 cities with population > 15,000, via
-`geonamescache`), and times are computed locally with Python's `zoneinfo` (DST included).
-No API keys, no rate limits, no external service to go down.
+- Who is on the team?
+- Where is John based?
+- What's Emma's time zone?
+- How many hours ahead or behind is John compared with Smith?
+
+The team is defined in [`src/world_time_mcp/team.json`](src/world_time_mcp/team.json) (ten members across
+ten time zones); edit it to use your own team. Times are computed locally with Python's `zoneinfo`, so
+differences account for daylight saving time on the day you ask. No API keys or external services.
 
 ## Tools
 
 | Tool | Arguments | Description |
 |---|---|---|
-| `get_time` | `city` | Current local time in a city or IANA zone |
-| `compare_times` | `cities` (list) | Current time in several cities at once |
-| `convert_time` | `time`, `from_city`, `to_city` | Convert a time from one city to another |
-| `find_cities` | `query`, `limit` | List matching cities and their zones (for ambiguous names) |
+| `list_team_members` | | Everyone on the team, with role, city, country and time zone |
+| `where_is` | `person` | The city and country a team member is based in |
+| `get_timezone` | `person` | A member's time zone, current UTC offset and local time |
+| `time_difference` | `person`, `other_person` | How many hours `person` is ahead of or behind `other_person` right now |
 
-City inputs accept:
+People can be named by full name, first name or last name, ignoring case and accents
+(`John`, `carter`, `Lukas Muller`). An ambiguous or unknown name returns an error listing the matches
+or the whole team.
 
-- Plain names, case- and accent-insensitive: `Colombo`, `sao paulo`, `Bombay`
-- A country or US state qualifier: `London, Canada`, `Paris, TX`, `Portland, Oregon`
-- IANA time zones: `Asia/Tokyo`, `UTC`
-
-Ambiguous names resolve to the most populous match (`Paris` → Paris, France).
-
-`time` accepts `14:30`, `2:30 PM`, or a dated value such as `2026-03-29 14:30` / `2026-03-29 2:30 PM`.
-Time-only values are taken as today in `from_city`.
-
-Example `get_time("Colombo")` result:
+Example `time_difference("John", "Smith")` result (in November):
 
 ```json
 {
-  "query": "Colombo",
-  "city": "Colombo, Sri Lanka",
-  "timezone": "Asia/Colombo",
-  "local_time": "2026-11-16T08:36:42+05:30",
-  "readable": "Monday, 16 November 2026, 08:36",
-  "utc_offset": "+05:30",
-  "abbreviation": "+0530",
-  "is_dst": false
+  "person": {"name": "John Carter", "timezone": "America/New_York", "local_time": "2026-11-15T23:47-05:00"},
+  "other_person": {"name": "Emma Smith", "timezone": "Europe/London", "local_time": "2026-11-16T04:47+00:00"},
+  "difference_hours": -5.0,
+  "summary": "John Carter (New York) is 5 hours behind Emma Smith (London)."
 }
 ```
 

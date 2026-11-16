@@ -1,10 +1,10 @@
-"""World Time MCP server."""
+"""Team time zone MCP server."""
 
 from __future__ import annotations
 
 import argparse
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -14,144 +14,110 @@ from mcp.types import ToolAnnotations
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from world_time_mcp import cities as city_lookup
+from world_time_mcp import team
 
 mcp = MCPServer(
     name="world-time",
     instructions=(
-        "Tells the current time in cities around the world and converts times between cities. "
-        "Cities can be qualified with a country or US state, e.g. 'Paris, France' or 'Portland, OR'. "
-        "IANA time zone names such as 'Asia/Colombo' are also accepted."
+        "Directory of the team: who is on it, where each person is based, their time zone, "
+        "and how many hours ahead or behind one person is compared with another. "
+        "People can be referred to by full name, first name or last name."
     ),
 )
 
 _READ_ONLY = ToolAnnotations(readOnlyHint=True, openWorldHint=False)
 
 
-def _resolve(query: str) -> tuple[str, city_lookup.City | None]:
+def _member(person: str) -> team.Member:
     try:
-        return city_lookup.resolve(query)
+        return team.find(person)
     except ValueError as exc:
         raise ToolError(str(exc)) from exc
 
 
-def _describe(moment: datetime, query: str, tz_name: str, city: city_lookup.City | None) -> dict[str, Any]:
-    offset = moment.utcoffset()
-    total_minutes = int(offset.total_seconds() // 60) if offset is not None else 0
+def _format_offset(offset: timedelta) -> str:
+    total_minutes = int(offset.total_seconds() // 60)
     sign = "+" if total_minutes >= 0 else "-"
     hours, minutes = divmod(abs(total_minutes), 60)
-    return {
-        "query": query,
-        "city": city.label if city else None,
-        "timezone": tz_name,
-        "local_time": moment.isoformat(timespec="seconds"),
-        "readable": moment.strftime("%A, %d %B %Y, %H:%M"),
-        "utc_offset": f"{sign}{hours:02d}:{minutes:02d}",
-        "abbreviation": moment.tzname(),
-        "is_dst": bool(moment.dst()),
-    }
+    return f"{sign}{hours:02d}:{minutes:02d}"
 
 
-def _parse_time(value: str, tz: ZoneInfo) -> datetime:
-    value = value.strip()
-    try:
-        parsed = datetime.fromisoformat(value)
-    except ValueError:
-        parsed = None
-    if parsed is None:
-        for fmt in ("%H:%M", "%H:%M:%S", "%I:%M %p", "%I %p", "%I:%M%p", "%I%p"):
-            try:
-                clock = datetime.strptime(value.upper(), fmt).time()
-            except ValueError:
-                pass
-            else:
-                return datetime.combine(datetime.now(tz).date(), clock, tzinfo=tz)
-            try:
-                return datetime.strptime(value.upper(), f"%Y-%m-%d {fmt}").replace(tzinfo=tz)
-            except ValueError:
-                pass
-        raise ToolError(
-            f"Could not understand time {value!r}. "
-            "Use 'HH:MM', '3:30 PM', or prefix a date: 'YYYY-MM-DD HH:MM'."
-        )
-    if parsed.tzinfo is None:
-        return parsed.replace(tzinfo=tz)
-    return parsed.astimezone(tz)
+def _format_hours(hours: float) -> str:
+    whole, minutes = divmod(round(abs(hours) * 60), 60)
+    text = f"{whole} hour{'s' if whole != 1 else ''}"
+    return f"{text} {minutes} minutes" if minutes else text
+
+
+def _local_now(member: team.Member) -> datetime:
+    return datetime.now(timezone.utc).astimezone(ZoneInfo(member.timezone))
+
+
+def _snapshot(member: team.Member, now: datetime) -> dict[str, str]:
+    return {"name": member.name, "timezone": member.timezone, "local_time": now.isoformat(timespec="minutes")}
 
 
 @mcp.tool(annotations=_READ_ONLY)
-def get_time(city: str) -> dict[str, Any]:
-    """Get the current local time in a city (or IANA time zone).
-
-    Args:
-        city: City name, optionally with a country or US state, e.g. "Colombo",
-            "London, Canada", "Portland, OR", or an IANA zone like "Asia/Tokyo".
-    """
-    tz_name, match = _resolve(city)
-    now = datetime.now(timezone.utc).astimezone(ZoneInfo(tz_name))
-    return _describe(now, city, tz_name, match)
-
-
-@mcp.tool(annotations=_READ_ONLY)
-def compare_times(cities: list[str]) -> list[dict[str, Any]]:
-    """Get the current local time in several cities at once.
-
-    Args:
-        cities: City names or IANA zones, e.g. ["Colombo", "London", "New York"].
-    """
-    if not cities:
-        raise ToolError("Provide at least one city.")
-    now = datetime.now(timezone.utc)
-    results = []
-    for query in cities:
-        tz_name, match = _resolve(query)
-        results.append(_describe(now.astimezone(ZoneInfo(tz_name)), query, tz_name, match))
-    return results
-
-
-@mcp.tool(annotations=_READ_ONLY)
-def convert_time(time: str, from_city: str, to_city: str) -> dict[str, Any]:
-    """Convert a time in one city to the local time in another city.
-
-    Args:
-        time: Time in the source city: "14:30", "2:30 PM", or "2026-03-29 14:30" /
-            "2026-03-29 2:30 PM" for a specific date. Time-only values are taken as today in `from_city`.
-        from_city: City (or IANA zone) the time belongs to.
-        to_city: City (or IANA zone) to convert the time to.
-    """
-    from_tz, from_match = _resolve(from_city)
-    to_tz, to_match = _resolve(to_city)
-    source = _parse_time(time, ZoneInfo(from_tz))
-    target = source.astimezone(ZoneInfo(to_tz))
-    day_shift = (target.date() - source.date()).days
-    return {
-        "from": _describe(source, from_city, from_tz, from_match),
-        "to": _describe(target, to_city, to_tz, to_match),
-        "day_difference": day_shift,
-    }
-
-
-@mcp.tool(annotations=_READ_ONLY)
-def find_cities(query: str, limit: int = 5) -> list[dict[str, Any]]:
-    """List cities matching a name, largest first, with their time zones.
-
-    Useful when a name is ambiguous (e.g. "Paris" or "Springfield").
-
-    Args:
-        query: City name, optionally with a country or US state after a comma.
-        limit: Maximum number of results (1-25).
-    """
-    limit = max(1, min(limit, 25))
+def list_team_members() -> list[dict[str, str]]:
+    """List everyone on the team with their role, city, country and time zone."""
     return [
-        {
-            "city": c.label,
-            "timezone": c.timezone,
-            "population": c.population,
-            "latitude": c.latitude,
-            "longitude": c.longitude,
-        }
-        for c in city_lookup.find_cities(query, limit=limit)
+        {"name": m.name, "role": m.role, "city": m.city, "country": m.country, "timezone": m.timezone}
+        for m in team.members()
     ]
+
+
+@mcp.tool(annotations=_READ_ONLY)
+def where_is(person: str) -> dict[str, str]:
+    """Find out where a team member is based (city and country).
+
+    Args:
+        person: Full name, first name or last name, e.g. "John", "Smith" or "Emma Smith".
+    """
+    m = _member(person)
+    return {"name": m.name, "role": m.role, "city": m.city, "country": m.country}
+
+
+@mcp.tool(annotations=_READ_ONLY)
+def get_timezone(person: str) -> dict[str, Any]:
+    """Get a team member's time zone, current UTC offset and current local time.
+
+    Args:
+        person: Full name, first name or last name, e.g. "John", "Smith" or "Emma Smith".
+    """
+    m = _member(person)
+    now = _local_now(m)
+    return {
+        "name": m.name,
+        "city": m.city,
+        "timezone": m.timezone,
+        "utc_offset": _format_offset(now.utcoffset() or timedelta()),
+        "abbreviation": now.tzname(),
+        "is_dst": bool(now.dst()),
+        "local_time": now.isoformat(timespec="seconds"),
+    }
+
+
+@mcp.tool(annotations=_READ_ONLY)
+def time_difference(person: str, other_person: str) -> dict[str, Any]:
+    """How many hours `person` is ahead of or behind `other_person` right now (DST-aware).
+
+    Args:
+        person: The team member to describe, e.g. "John".
+        other_person: The team member to compare against, e.g. "Smith".
+    """
+    a, b = _member(person), _member(other_person)
+    a_now, b_now = _local_now(a), _local_now(b)
+    diff = ((a_now.utcoffset() or timedelta()) - (b_now.utcoffset() or timedelta())).total_seconds() / 3600
+    if diff == 0:
+        summary = f"{a.name} and {b.name} are in the same time zone right now."
+    else:
+        direction = "ahead of" if diff > 0 else "behind"
+        summary = f"{a.name} ({a.city}) is {_format_hours(diff)} {direction} {b.name} ({b.city})."
+    return {
+        "person": _snapshot(a, a_now),
+        "other_person": _snapshot(b, b_now),
+        "difference_hours": diff,
+        "summary": summary,
+    }
 
 
 @mcp.custom_route("/health", methods=["GET"])

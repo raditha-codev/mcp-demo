@@ -1,0 +1,12 @@
+[
+  {"name": "Nimal Perera", "role": "Engineering Manager", "city": "Colombo", "country": "Sri Lanka", "timezone": "Asia/Colombo"},
+  {"name": "John Carter", "role": "Backend Engineer", "city": "New York", "country": "United States", "timezone": "America/New_York"},
+  {"name": "Emma Smith", "role": "Product Manager", "city": "London", "country": "United Kingdom", "timezone": "Europe/London"},
+  {"name": "Priya Sharma", "role": "Frontend Engineer", "city": "Bengaluru", "country": "India", "timezone": "Asia/Kolkata"},
+  {"name": "Lukas Müller", "role": "DevOps Engineer", "city": "Berlin", "country": "Germany", "timezone": "Europe/Berlin"},
+  {"name": "Aiko Tanaka", "role": "Designer", "city": "Tokyo", "country": "Japan", "timezone": "Asia/Tokyo"},
+  {"name": "Carlos Mendes", "role": "QA Engineer", "city": "São Paulo", "country": "Brazil", "timezone": "America/Sao_Paulo"},
+  {"name": "Olivia Brown", "role": "Data Scientist", "city": "Sydney", "country": "Australia", "timezone": "Australia/Sydney"},
+  {"name": "Mike Johnson", "role": "Mobile Engineer", "city": "San Francisco", "country": "United States", "timezone": "America/Los_Angeles"},
+  {"name": "Fatima Al-Sayed", "role": "Security Engineer", "city": "Dubai", "country": "United Arab Emirates", "timezone": "Asia/Dubai"}
+]

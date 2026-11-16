@@ -70,7 +70,7 @@ def test_health(http_server):
 async def test_streamable_http_tool_call(http_server):
     async with Client(f"{http_server}/mcp") as client:
         names = {t.name for t in (await client.list_tools()).tools}
-        assert "get_time" in names
-        result = await client.call_tool("get_time", {"city": "Colombo"})
+        assert "time_difference" in names
+        result = await client.call_tool("get_timezone", {"person": "Nimal"})
         assert not result.is_error
         assert result.structured_content["timezone"] == "Asia/Colombo"

@@ -1,5 +1,5 @@
 {
   "name": "world-time-stdio",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "World Time MCP server (stdio): runs on each Devin session machine via uvx"
 }

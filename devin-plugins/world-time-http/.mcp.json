@@ -2,7 +2,7 @@
   "mcpServers": {
     "world-time": {
       "url": "https://world-time-mcp.onrender.com/mcp",
-      "description": "Current time in cities worldwide and time conversion between cities (Streamable HTTP, hosted on Render)"
+      "description": "Team directory: where each team member is, their time zone, and time differences between people (Streamable HTTP, hosted on Render)"
     }
   }
 }

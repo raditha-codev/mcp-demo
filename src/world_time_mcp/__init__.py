@@ -1,3 +1,3 @@
-"""MCP server that tells the current time in cities around the world."""
+"""MCP server for a team directory: where people are, their time zones and time differences."""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

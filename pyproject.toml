@@ -1,13 +1,12 @@
 [project]
 name = "world-time-mcp"
-version = "0.1.0"
-description = "MCP server that tells the current time in cities around the world"
+version = "0.2.0"
+description = "MCP server for a team directory: where people are, their time zones and time differences"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 dependencies = [
     "mcp>=2.2,<3",
-    "geonamescache>=3.0,<4",
     "tzdata>=2024.1",
 ]
 

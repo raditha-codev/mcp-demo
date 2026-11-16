@@ -2,8 +2,12 @@
   "mcpServers": {
     "world-time": {
       "command": "/home/ubuntu/.local/bin/uvx",
-      "args": ["--from", "git+https://github.com/raditha-codev/mcp-demo", "world-time-mcp"],
-      "description": "Current time in cities worldwide and time conversion between cities (stdio)"
+      "args": [
+        "--from",
+        "git+https://github.com/raditha-codev/mcp-demo",
+        "world-time-mcp"
+      ],
+      "description": "Team directory: where each team member is, their time zone, and time differences between people (stdio)"
     }
   }
 }

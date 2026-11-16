@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 import pytest
 from mcp import Client
@@ -18,67 +19,78 @@ async def call(tool: str, args: dict):
         return await client.call_tool(tool, args)
 
 
+def _offset_hours(tz: str) -> float:
+    return datetime.now(timezone.utc).astimezone(ZoneInfo(tz)).utcoffset().total_seconds() / 3600
+
+
 async def test_lists_tools():
     async with Client(mcp) as client:
         names = {t.name for t in (await client.list_tools()).tools}
-    assert names == {"get_time", "compare_times", "convert_time", "find_cities"}
+    assert names == {"list_team_members", "where_is", "get_timezone", "time_difference"}
 
 
-async def test_get_time():
-    result = await call("get_time", {"city": "Colombo"})
+async def test_list_team_members():
+    result = await call("list_team_members", {})
+    assert not result.is_error
+    members = result.structured_content["result"]
+    assert len(members) == 10
+    assert {"name", "role", "city", "country", "timezone"} <= set(members[0])
+    for m in members:
+        ZoneInfo(m["timezone"])
+
+
+@pytest.mark.parametrize("query", ["John", "john", "Carter", "John Carter", "  JOHN   carter "])
+async def test_where_is_by_any_name(query):
+    result = await call("where_is", {"person": query})
+    assert not result.is_error
+    assert result.structured_content == {
+        "name": "John Carter",
+        "role": "Backend Engineer",
+        "city": "New York",
+        "country": "United States",
+    }
+
+
+async def test_name_matching_ignores_accents_and_partial_words():
+    assert (await call("where_is", {"person": "muller"})).structured_content["name"] == "Lukas Müller"
+    # "John" must not also match "Johnson"
+    assert (await call("where_is", {"person": "Johnson"})).structured_content["name"] == "Mike Johnson"
+
+
+async def test_unknown_person_is_tool_error():
+    result = await call("where_is", {"person": "Gandalf"})
+    assert result.is_error
+    assert "No team member called 'Gandalf'" in result.content[0].text
+    assert "Emma Smith" in result.content[0].text
+
+
+async def test_get_timezone():
+    result = await call("get_timezone", {"person": "Nimal"})
     assert not result.is_error
     data = result.structured_content
     assert data["timezone"] == "Asia/Colombo"
     assert data["utc_offset"] == "+05:30"
-    assert data["city"] == "Colombo, Sri Lanka"
+    assert data["is_dst"] is False
     datetime.fromisoformat(data["local_time"])
 
 
-async def test_get_time_unknown_city_is_tool_error():
-    result = await call("get_time", {"city": "Notarealcityxyz"})
-    assert result.is_error
-    assert "Unknown city" in result.content[0].text
-
-
-async def test_compare_times():
-    result = await call("compare_times", {"cities": ["Colombo", "Tokyo", "UTC"]})
-    assert not result.is_error
-    zones = [r["timezone"] for r in result.structured_content["result"]]
-    assert zones == ["Asia/Colombo", "Asia/Tokyo", "UTC"]
-
-
-@pytest.mark.parametrize(
-    ("time", "from_city", "to_city", "expected", "day_diff"),
-    [
-        ("2026-01-15 09:00", "Colombo", "London", "2026-01-15T03:30:00+00:00", 0),
-        ("2026-07-15 09:00", "Colombo", "London", "2026-07-15T04:30:00+01:00", 0),
-        ("2026-01-15 23:00", "New York", "Tokyo", "2026-01-16T13:00:00+09:00", 1),
-        ("2026-01-15 3:30 PM", "UTC", "Colombo", "2026-01-15T21:00:00+05:30", 0),
-        ("half past three", "UTC", "Colombo", None, None),
-    ],
-)
-async def test_convert_time(time, from_city, to_city, expected, day_diff):
-    result = await call("convert_time", {"time": time, "from_city": from_city, "to_city": to_city})
-    if expected is None:
-        assert result.is_error
-        return
+async def test_time_difference_john_vs_smith():
+    result = await call("time_difference", {"person": "John", "other_person": "Smith"})
     assert not result.is_error
     data = result.structured_content
-    assert data["to"]["local_time"] == expected
-    assert data["day_difference"] == day_diff
+    expected = _offset_hours("America/New_York") - _offset_hours("Europe/London")
+    assert data["difference_hours"] == expected
+    assert data["summary"] == f"John Carter (New York) is {-int(expected)} hours behind Emma Smith (London)."
 
 
-async def test_convert_time_only():
-    result = await call(
-        "convert_time", {"time": "2:30 PM", "from_city": "Colombo", "to_city": "Asia/Kolkata"}
-    )
-    assert not result.is_error
-    assert result.structured_content["to"]["local_time"].endswith("T14:30:00+05:30")
+async def test_time_difference_half_hour_and_reversed():
+    result = await call("time_difference", {"person": "Nimal", "other_person": "Emma"})
+    data = result.structured_content
+    assert data["difference_hours"] == _offset_hours("Asia/Colombo") - _offset_hours("Europe/London")
+    assert "hours 30 minutes ahead of Emma Smith" in data["summary"]
 
 
-async def test_find_cities():
-    result = await call("find_cities", {"query": "Springfield, US", "limit": 3})
-    assert not result.is_error
-    rows = result.structured_content["result"]
-    assert len(rows) == 3
-    assert all(", US" not in r["city"] or "United States" in r["city"] for r in rows)
+async def test_time_difference_same_person():
+    result = await call("time_difference", {"person": "Aiko", "other_person": "Tanaka"})
+    assert result.structured_content["difference_hours"] == 0
+    assert "same time zone" in result.structured_content["summary"]
