@@ -1,0 +1,5 @@
+{
+  "name": "world-time-http",
+  "version": "0.1.0",
+  "description": "World Time MCP server (Streamable HTTP): connects to a hosted deployment, e.g. on Render"
+}

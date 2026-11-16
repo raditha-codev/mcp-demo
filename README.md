@@ -45,7 +45,10 @@ Example `get_time("Colombo")` result:
 
 ## Install
 
-Requires Python 3.10+.
+See [INSTALL.md](INSTALL.md) for step-by-step setup of both versions: **stdio** (in Devin Cloud or any
+MCP client) and **Streamable HTTP** (deployed to Render).
+
+To run it locally (Python 3.10+):
 
 ```bash
 git clone https://github.com/raditha-codev/mcp-demo.git

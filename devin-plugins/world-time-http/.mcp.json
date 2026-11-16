@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "world-time": {
+      "url": "https://world-time-mcp.onrender.com/mcp",
+      "description": "Current time in cities worldwide and time conversion between cities (Streamable HTTP, hosted on Render)"
+    }
+  }
+}

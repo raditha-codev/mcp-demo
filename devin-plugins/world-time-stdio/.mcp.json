@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "world-time": {
+      "command": "/home/ubuntu/.local/bin/uvx",
+      "args": ["--from", "git+https://github.com/raditha-codev/mcp-demo", "world-time-mcp"],
+      "description": "Current time in cities worldwide and time conversion between cities (stdio)"
+    }
+  }
+}
