@@ -38,4 +38,4 @@ saving time for today.
 ## If the tools are missing
 
 If no `team-time` tools are available, say the team-time MCP server isn't connected in this session
-and point to the setup guide: https://github.com/raditha-codev/mcp-demo/blob/main/DEVIN_SETUP.md
+and point to the setup guide: https://github.com/raditha-codev/mcp-demo/blob/main/PLUGIN_INSTALL.md

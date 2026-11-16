@@ -38,10 +38,12 @@ Example `time_difference("John", "Smith")` result (in November):
 
 ## Install
 
-For Devin Cloud, see [DEVIN_SETUP.md](DEVIN_SETUP.md): this repo is a Devin plugin (MCP server plus a
-`team-time` skill) that installs from Customize → Plugins.
-See [INSTALL.md](INSTALL.md) for step-by-step setup of both versions: **stdio** (in Devin Cloud or any
-MCP client) and **Streamable HTTP** (deployed to Render).
+In Devin Cloud, install it one of two ways:
+
+- **As a plugin** (MCP server plus a `team-time` skill): [PLUGIN_INSTALL.md](PLUGIN_INSTALL.md).
+- **As an MCP server only**, from Customize → MCPs → +: [MCP_INSTALL.md](MCP_INSTALL.md).
+
+For other MCP clients and the Render deploy, see [INSTALL.md](INSTALL.md).
 
 To run it locally (Python 3.10+):
 

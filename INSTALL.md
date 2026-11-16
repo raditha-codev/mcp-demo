@@ -1,7 +1,9 @@
 # Installing the Team Time MCP server
 
-**Using Devin Cloud?** Follow [DEVIN_SETUP.md](DEVIN_SETUP.md): it covers the Devin plugin and the
-manual Customize → MCPs setup.
+**Using Devin Cloud?** Use one of the Devin guides instead:
+
+- [PLUGIN_INSTALL.md](PLUGIN_INSTALL.md): install the Devin plugin (MCP server plus the `team-time` skill).
+- [MCP_INSTALL.md](MCP_INSTALL.md): add only the MCP server from Customize → MCPs → +.
 
 There are two versions of the server. Pick one per client.
 
