@@ -1,5 +1,0 @@
-{
-  "name": "team-time-stdio",
-  "version": "0.2.0",
-  "description": "Team Time MCP server (stdio): team directory with locations, time zones and time differences; runs on each Devin session machine via uvx"
-}

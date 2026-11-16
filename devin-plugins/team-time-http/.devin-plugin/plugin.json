@@ -1,5 +1,9 @@
 {
   "name": "team-time-http",
-  "version": "0.2.0",
-  "description": "Team Time MCP server (Streamable HTTP): team directory with locations, time zones and time differences; connects to the hosted deployment on Render"
+  "displayName": "Team Time (hosted)",
+  "version": "0.3.0",
+  "description": "Team directory for Devin: who is on the team, where each person is based, their time zone, and how many hours ahead or behind one person is compared with another. Connects to the Team Time MCP server hosted on Render (Streamable HTTP).",
+  "shortDescription": "Team locations, time zones and time differences (hosted)",
+  "homepage": "https://github.com/raditha-codev/mcp-demo",
+  "keywords": ["Productivity", "Team"]
 }

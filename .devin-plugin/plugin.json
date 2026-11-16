@@ -1,0 +1,9 @@
+{
+  "name": "team-time",
+  "displayName": "Team Time",
+  "version": "0.3.0",
+  "description": "Team directory for Devin: who is on the team, where each person is based, their time zone, and how many hours ahead or behind one person is compared with another. Runs the Team Time MCP server on each session machine (stdio).",
+  "shortDescription": "Team locations, time zones and time differences",
+  "homepage": "https://github.com/raditha-codev/mcp-demo",
+  "keywords": ["Productivity", "Team"]
+}

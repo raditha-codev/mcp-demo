@@ -1,50 +1,20 @@
 # Installing the Team Time MCP server
 
-There are two independent ways to use this server. Pick either one (or both).
+**Using Devin Cloud?** Follow [DEVIN_SETUP.md](DEVIN_SETUP.md): it covers the Devin plugin and the
+manual Customize → MCPs setup.
 
-To add it to Devin Cloud by hand from **Customize → MCPs** instead of as a plugin, see
-[DEVIN_SETUP.md](DEVIN_SETUP.md).
+There are two versions of the server. Pick one per client.
 
 | | Stdio | Streamable HTTP |
 |---|---|---|
-| Where it runs | On each client machine / Devin session, started on demand | Once, on a host (Render) |
+| Where it runs | On the client machine, started on demand | Once, on a host (Render) |
 | Client connects via | A command (`uvx ... team-time-mcp`) | A URL (`https://<service>.onrender.com/mcp`) |
-| Needs | `uv` on the machine | A deployed service |
-| Devin plugin | [`devin-plugins/team-time-stdio`](devin-plugins/team-time-stdio) | [`devin-plugins/team-time-http`](devin-plugins/team-time-http) |
+| Needs | [uv](https://docs.astral.sh/uv/getting-started/installation/) on the machine | A deployed service |
 
----
+## Stdio in other MCP clients (Claude Desktop, Cursor, Windsurf, ...)
 
-## Option 1: Stdio
-
-### In Devin Cloud
-
-1. **Make sure `uv` is installed in session machines.** The organization blueprint
-   (Settings → Environment) needs:
-
-   ```yaml
-   initialize:
-     - name: install uv (needed by the team-time STDIO MCP server)
-       run: pip install --user uv
-   ```
-
-   This puts `uvx` at `/home/ubuntu/.local/bin/uvx`, which is the path the plugin uses.
-2. Open **Customize → Plugins → Add plugin → From repository**, choose the scope
-   (**Myself** or the organization), and enter repository `raditha-codev/mcp-demo` with
-   subdirectory `devin-plugins/team-time-stdio`.
-3. Start a new session. The `team-time` MCP server and its tools (`list_team_members`, `where_is`,
-   `get_timezone`, `time_difference`) are available. Running sessions keep what they loaded at start.
-
-With the Devin CLI, the equivalent of step 2 is:
-
-```bash
-devin plugins install raditha-codev/mcp-demo#devin-plugins/team-time-stdio
-```
-
-On a laptop, `uvx` is usually not at `/home/ubuntu/.local/bin/uvx`; use the generic config below instead.
-
-### In other MCP clients (Claude Desktop, Cursor, Windsurf, ...)
-
-Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then add:
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then add to the client's MCP
+config:
 
 ```json
 {
@@ -57,11 +27,7 @@ Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then add:
 }
 ```
 
----
-
-## Option 2: Streamable HTTP (hosted on Render)
-
-### Deploy to Render
+## Deploy to Render
 
 The repo includes a [`render.yaml`](render.yaml) Blueprint: a free Docker web service in the
 Singapore region, health-checked at `/health`, redeployed on every commit to `main`.
@@ -83,18 +49,7 @@ but put it behind auth if that matters to you.
 To change the region or plan, edit `render.yaml` before creating the service (Render can't change
 the region afterwards).
 
-### In Devin Cloud
-
-1. Check the URL in [`devin-plugins/team-time-http/.mcp.json`](devin-plugins/team-time-http/.mcp.json).
-   It is set to `https://team-time-mcp.onrender.com/mcp`. If Render gave your service a different
-   subdomain, update it and push.
-2. Open **Customize → Plugins → Add plugin → From repository**, choose the scope, and enter
-   repository `raditha-codev/mcp-demo` with subdirectory `devin-plugins/team-time-http`.
-3. Start a new session. No credentials are needed, so there's nothing to connect.
-
-No `uv` is needed on session machines for this option.
-
-### In other MCP clients
+## Streamable HTTP in other MCP clients
 
 ```json
 {
